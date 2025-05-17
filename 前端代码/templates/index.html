@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>基于水培的智能农业系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- 添加Google字体 -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- 添加Animate.css动画库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- 添加AOS (Animate On Scroll)库 -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <!-- 添加Boxicons图标 -->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation"></script>
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --primary-light: #80e27e;
+            --primary-dark: #087f23;
+            --secondary-color: #2196F3;
+            --accent-color: #FF9800;
+            --text-primary: #212121;
+            --text-secondary: #757575;
+            --bg-light: #f8f9fa;
+            --bg-gradient: linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%);
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #f0f7fa;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            padding: 0 10px;
+        }
+        
+        .page-header {
+            background: var(--bg-gradient);
+            border-radius: 0 0 20px 20px;
+            padding: 1.5rem 1rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .page-title {
+            font-weight: 700;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s, box-shadow 0.3s;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-header {
+            background: white;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            padding: 1rem 1.5rem;
+        }
+        
+        .card-header h2 {
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin: 0;
+        }
+        
+        .card-body {
+            padding: 1.25rem;
+        }
+        
+        .sensor-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.2rem;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+            height: 100%;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .sensor-card:hover {
+            transform: scale(1.03);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sensor-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: var(--bg-light);
+            height: 70px;
+            width: 70px;
+            line-height: 70px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        
+        .water-icon { background-color: rgba(33, 150, 243, 0.1); }
+        .temp-icon { background-color: rgba(244, 67, 54, 0.1); }
+        .humi-icon { background-color: rgba(156, 39, 176, 0.1); }
+        .light-icon { background-color: rgba(255, 193, 7, 0.1); }
+        
+        .sensor-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+            transition: all 0.3s;
+        }
+        
+        .sensor-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .btn {
+            border-radius: 10px;
+            padding: 0.5rem 1.25rem;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            border-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-outline-success {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-outline-success:hover,
+        .btn-outline-success.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        
+        .form-check-input:checked {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .form-switch .form-check-input {
+            width: 3em;
+            height: 1.5em;
+            cursor: pointer;
+        }
+        
+        .threshold-group {
+            background: var(--bg-light);
+            padding: 1rem;
+            border-radius: 10px;
+        }
+        
+        .chart-container {
+            height: 250px;
+            margin: 10px 0;
+        }
+        
+        .preset-mode-selector {
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .preset-buttons-container {
+            gap: 0.5rem;
+        }
+        
+        .preset-mode-btn {
+            flex: 1;
+            min-width: 100px;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            padding: 0.5rem;
+        }
+        
+        .nav-tabs .nav-link {
+            color: var(--text-secondary);
+            border: none;
+            border-bottom: 2px solid transparent;
+            padding: 0.5rem 1rem;
+            margin-right: 0.5rem;
+            border-radius: 0;
+        }
+        
+        .nav-tabs .nav-link:hover {
+            border-color: transparent;
+            color: var(--primary-color);
+        }
+        
+        .nav-tabs .nav-link.active {
+            color: var(--primary-color);
+            background: transparent;
+            border-bottom: 2px solid var(--primary-color);
+        }
+        
+        .row {
+            margin-left: -0.5rem;
+            margin-right: -0.5rem;
+        }
+        
+        .row > [class^="col-"] {
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+        }
+        
+        #image-container {
+            position: relative;
+            background: var(--bg-light);
+            border-radius: 10px;
+            overflow: hidden;
+            height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #camera-image {
+            max-height: 250px;
+            max-width: 100%;
+            object-fit: contain;
+        }
+        
+        #no-image-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+        
+        .connection-status-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        .status-connecting { background-color: #FFC107; }
+        .status-connected { background-color: #4CAF50; }
+        .status-disconnected { background-color: #F44336; }
+        
+        /* 设备状态标签 */
+        .device-status {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-left: 0.5rem;
+        }
+        
+        .status-on {
+            background-color: rgba(76, 175, 80, 0.15);
+            color: #2E7D32;
+        }
+        
+        .status-off {
+            background-color: rgba(158, 158, 158, 0.15);
+            color: #757575;
+        }
+        
+        /* 加载动画 */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .page-header {
+                border-radius: 0 0 15px 15px;
+                padding: 1.5rem 1rem;
+            }
+            
+            .card {
+                margin-bottom: 1rem;
+            }
+            
+            .sensor-icon {
+                font-size: 2rem;
+                height: 60px;
+                width: 60px;
+                line-height: 60px;
+            }
+            
+            .sensor-value {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="page-header text-center animate__animated animate__fadeIn">
+            <h1 class="page-title mb-2">基于水培的智能农业系统</h1>
+            <div id="connection-status" class="alert alert-warning d-inline-flex align-items-center px-4 py-2">
+                <span class="connection-status-dot status-connecting"></span>
+                <span>正在连接MQTT服务器...</span>
+            </div>
+        </header>
+
+        <!-- 上半部分：传感器数据和摄像头 -->
+        <div class="row">
+            <!-- 传感器数据卡片 -->
+            <div class="col-md-6" data-aos="fade-right" data-aos-duration="800">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h2 class="h5 mb-0"><i class='bx bx-line-chart me-2'></i>传感器数据</h2>
+                        <button id="refresh-sensors" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <div class="sensor-card">
+                                    <div class="sensor-icon water-icon">💧</div>
+                                    <div class="sensor-value" id="water-value">--</div>
+                                    <div class="sensor-label">水位 (%)</div>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <div class="sensor-card">
+                                    <div class="sensor-icon temp-icon">🌡️</div>
+                                    <div class="sensor-value" id="temp-value">--</div>
+                                    <div class="sensor-label">温度 (°C)</div>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <div class="sensor-card">
+                                    <div class="sensor-icon humi-icon">💦</div>
+                                    <div class="sensor-value" id="humi-value">--</div>
+                                    <div class="sensor-label">湿度 (%)</div>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <div class="sensor-card">
+                                    <div class="sensor-icon light-icon">☀️</div>
+                                    <div class="sensor-value" id="light-value">--</div>
+                                    <div class="sensor-label">光照 (lux)</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 摄像头图像 -->
+            <div class="col-md-6" data-aos="fade-left" data-aos-duration="800">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h2 class="h5 mb-0"><i class='bx bx-camera me-2'></i>摄像头图像</h2>
+                        <button id="refresh-image" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-redo-alt"></i> 刷新
+                        </button>
+                    </div>
+                    <div class="card-body text-center p-2">
+                        <div id="image-container">
+                            <img id="camera-image" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=" class="img-fluid" alt="摄像头图像">
+                            <div id="no-image-message">
+                                <i class='bx bx-image-alt fs-1'></i>
+                                <p>无图像数据</p>
+                            </div>
+                        </div>
+                        <div id="image-info" class="mt-2 small text-muted">
+                            <i class='bx bx-info-circle me-1'></i> 尺寸: -- x -- | 格式: -- | 时间戳: --
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 设备控制卡片 -->
+        <div class="row">
+            <div class="col-12" data-aos="fade-up" data-aos-duration="800" data-aos-delay="100">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h2 class="h5 mb-0"><i class='bx bx-slider-alt me-2'></i>设备控制</h2>
+                        <span id="control-mode-indicator" class="device-status status-off">手动模式</span>
+                    </div>
+                    <div class="card-body">
+                        <!-- 控制模式切换 -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <div class="d-flex justify-content-center align-items-center">
+                                    <label class="me-3 fw-bold">控制模式:</label>
+                                    <div class="btn-group" role="group">
+                                        <input type="radio" class="btn-check" name="controlMode" id="manual-mode" value="manual" checked>
+                                        <label class="btn btn-outline-primary" for="manual-mode">
+                                            <i class="fas fa-hand-pointer me-1"></i> 手动控制
+                                        </label>
+                                        
+                                        <input type="radio" class="btn-check" name="controlMode" id="auto-mode" value="auto">
+                                        <label class="btn btn-outline-primary" for="auto-mode">
+                                            <i class="fas fa-robot me-1"></i> 自动控制
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 手动控制面板 -->
+                        <div id="manual-control-panel" class="row animate__animated animate__fadeIn">
+                            <div class="col-md-4 mb-3">
+                                <div class="sensor-card">
+                                    <div class="sensor-icon light-icon">
+                                        <i class='bx bx-bulb'></i>
+                                    </div>
+                                    <span class="mb-2 fw-bold">补光灯</span>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input control-switch" type="checkbox" id="fan-switch" data-device="fan">
+                                        <label class="form-check-label" for="fan-switch">关闭</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="sensor-card">
+                                    <div class="sensor-icon humi-icon">
+                                        <i class='bx bx-wind'></i>
+                                    </div>
+                                    <span class="mb-2 fw-bold">排气扇</span>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input control-switch" type="checkbox" id="exh-switch" data-device="exh">
+                                        <label class="form-check-label" for="exh-switch">关闭</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <div class="sensor-card">
+                                    <div class="sensor-icon water-icon">
+                                        <i class='bx bx-droplet'></i>
+                                    </div>
+                                    <span class="mb-2 fw-bold">水泵</span>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input control-switch" type="checkbox" id="pum-switch" data-device="pum">
+                                        <label class="form-check-label" for="pum-switch">关闭</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 自动控制阈值设置面板 -->
+                        <div id="auto-control-panel" class="row animate__animated animate__fadeIn" style="display: none;">
+                            <div class="col-12">
+                                <div class="alert alert-info d-flex p-3">
+                                    <i class='bx bx-info-circle me-2 fs-5'></i>
+                                    <small>
+                                    设置阈值范围，当传感器数据超过或低于阈值时，系统将自动控制设备：<br>
+                                    - <b>光线低于下限</b>：开启补光灯 | <b>高于上限</b>：关闭补光灯<br>
+                                    - <b>湿度超过上限</b>：开启排气 | <b>低于下限</b>：关闭排气<br>
+                                    - <b>水位低于下限</b>：开启水泵 | <b>高于上限</b>：关闭水泵
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <!-- 预设模式选择 -->
+                            <div class="col-12 mb-3">
+                                <div class="preset-mode-selector p-3 bg-light rounded">
+                                    <h6 class="mb-3"><i class='bx bx-book-bookmark me-1'></i> 选择预设模式</h6>
+                                    <div class="d-flex justify-content-between flex-wrap preset-buttons-container">
+                                        <button class="btn btn-outline-success preset-mode-btn active" data-preset="normal">
+                                            <i class="fas fa-leaf me-1"></i> 正常模式
+                                        </button>
+                                        <button class="btn btn-outline-success preset-mode-btn" data-preset="eco">
+                                            <i class="fas fa-bolt me-1"></i> 节能模式
+                                        </button>
+                                        <button class="btn btn-outline-success preset-mode-btn" data-preset="grow">
+                                            <i class="fas fa-seedling me-1"></i> 生长促进
+                                        </button>
+                                        <button class="btn btn-outline-primary preset-mode-btn" data-preset="custom">
+                                            <i class="fas fa-sliders me-1"></i> 自定义
+                                        </button>
+                                    </div>
+                                    <div class="current-preset-label mt-2">
+                                        <small class="text-muted">当前使用: <span id="current-preset-name">正常模式</span></small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 水位阈值 -->
+                            <div class="col-md-6 mb-3">
+                                <div class="threshold-group">
+                                    <label class="d-flex align-items-center fw-bold mb-2">
+                                        <i class='bx bx-droplet me-1'></i> 水位阈值 (%)
+                                    </label>
+                                    <div class="d-flex justify-content-between">
+                                        <div class="input-group input-group-sm me-2">
+                                            <span class="input-group-text">下限</span>
+                                            <input type="number" class="form-control threshold-input" id="water-min" data-sensor="water" data-type="min" min="0" max="100" value="30">
+                                        </div>
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text">上限</span>
+                                            <input type="number" class="form-control threshold-input" id="water-max" data-sensor="water" data-type="max" min="0" max="100" value="70">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 温度阈值 -->
+                            <div class="col-md-6 mb-3">
+                                <div class="threshold-group">
+                                    <label class="d-flex align-items-center fw-bold mb-2">
+                                        <i class='bx bx-cool me-1'></i> 温度阈值 (°C)
+                                    </label>
+                                    <div class="d-flex justify-content-between">
+                                        <div class="input-group input-group-sm me-2">
+                                            <span class="input-group-text">下限</span>
+                                            <input type="number" class="form-control threshold-input" id="temp-min" data-sensor="temp" data-type="min" min="0" max="50" value="20">
+                                        </div>
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text">上限</span>
+                                            <input type="number" class="form-control threshold-input" id="temp-max" data-sensor="temp" data-type="max" min="0" max="50" value="30">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 湿度阈值 -->
+                            <div class="col-md-6 mb-3">
+                                <div class="threshold-group">
+                                    <label class="d-flex align-items-center fw-bold mb-2">
+                                        <i class='bx bx-cloud-drizzle me-1'></i> 湿度阈值 (%)
+                                    </label>
+                                    <div class="d-flex justify-content-between">
+                                        <div class="input-group input-group-sm me-2">
+                                            <span class="input-group-text">下限</span>
+                                            <input type="number" class="form-control threshold-input" id="humi-min" data-sensor="humi" data-type="min" min="0" max="100" value="40">
+                                        </div>
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text">上限</span>
+                                            <input type="number" class="form-control threshold-input" id="humi-max" data-sensor="humi" data-type="max" min="0" max="100" value="70">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 光照阈值 -->
+                            <div class="col-md-6 mb-3">
+                                <div class="threshold-group">
+                                    <label class="d-flex align-items-center fw-bold mb-2">
+                                        <i class='bx bx-sun me-1'></i> 光照阈值 (lux)
+                                    </label>
+                                    <div class="d-flex justify-content-between">
+                                        <div class="input-group input-group-sm me-2">
+                                            <span class="input-group-text">下限</span>
+                                            <input type="number" class="form-control threshold-input" id="light-min" data-sensor="light" data-type="min" min="0" max="10000" value="500">
+                                        </div>
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text">上限</span>
+                                            <input type="number" class="form-control threshold-input" id="light-max" data-sensor="light" data-type="max" min="0" max="10000" value="2000">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 保存按钮 -->
+                            <div class="col-12 text-center mt-2">
+                                <button id="save-thresholds" class="btn btn-primary btn-sm">
+                                    <i class='bx bx-save me-1'></i> 保存阈值设置
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 传感器数据图表 -->
+        <div class="row">
+            <div class="col-12" data-aos="fade-up" data-aos-duration="800" data-aos-delay="200">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="h5 mb-0"><i class='bx bx-line-chart me-2'></i>传感器数据趋势</h2>
+                        <div class="d-flex justify-content-between align-items-center mt-2">
+                            <ul class="nav nav-tabs card-header-tabs" id="chart-tabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="water-tab" data-bs-toggle="tab" data-bs-target="#water-chart-tab" type="button" role="tab" aria-controls="water-chart-tab" aria-selected="true">
+                                        <i class='bx bx-droplet me-1'></i> 水位
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="temp-tab" data-bs-toggle="tab" data-bs-target="#temp-chart-tab" type="button" role="tab" aria-controls="temp-chart-tab" aria-selected="false">
+                                        <i class='bx bx-cool me-1'></i> 温度
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="humi-tab" data-bs-toggle="tab" data-bs-target="#humi-chart-tab" type="button" role="tab" aria-controls="humi-chart-tab" aria-selected="false">
+                                        <i class='bx bx-cloud-drizzle me-1'></i> 湿度
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="light-tab" data-bs-toggle="tab" data-bs-target="#light-chart-tab" type="button" role="tab" aria-controls="light-chart-tab" aria-selected="false">
+                                        <i class='bx bx-sun me-1'></i> 光照
+                                    </button>
+                                </li>
+                            </ul>
+                            <div class="btn-group btn-group-sm">
+                                <button id="refresh-chart" class="btn btn-outline-primary" title="刷新图表">
+                                    <i class="fas fa-sync-alt"></i> 刷新
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content" id="chart-tab-content">
+                            <div class="tab-pane fade show active" id="water-chart-tab" role="tabpanel" aria-labelledby="water-tab">
+                                <div class="chart-container">
+                                    <canvas id="water-chart"></canvas>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="temp-chart-tab" role="tabpanel" aria-labelledby="temp-tab">
+                                <div class="chart-container">
+                                    <canvas id="temp-chart"></canvas>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="humi-chart-tab" role="tabpanel" aria-labelledby="humi-tab">
+                                <div class="chart-container">
+                                    <canvas id="humi-chart"></canvas>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="light-chart-tab" role="tabpanel" aria-labelledby="light-tab">
+                                <div class="chart-container">
+                                    <canvas id="light-chart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- 添加AOS动画库 -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        // 初始化AOS动画
+        document.addEventListener('DOMContentLoaded', function() {
+            AOS.init();
+        });
+    </script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html> 

@@ -1,0 +1,13 @@
+../Core/Src/MainApp.c:81:14:ConvertToLux	1
+../Core/Src/MainApp.c:103:16:ConvertToPercent	1
+../Core/Src/MainApp.c:112:13:ReadSensors	4
+../Core/Src/MainApp.c:168:13:UpdateDisplay	5
+../Core/Src/MainApp.c:237:13:UpdateDeviceStatus	4
+../Core/Src/MainApp.c:287:13:ProcessJsonCommand	44
+../Core/Src/MainApp.c:491:13:ParseJsonValue	31
+../Core/Src/MainApp.c:622:13:SendSensorData	4
+../Core/Src/MainApp.c:650:6:HAL_UART_RxCpltCallback	8
+../Core/Src/MainApp.c:680:6:MainApp_Init	1
+../Core/Src/MainApp.c:720:6:MainApp_RunLoop	7
+../Core/Src/MainApp.c:772:6:MainApp_UpdateDeviceStatus	1
+../Core/Src/MainApp.c:778:6:HAL_UART_ErrorCallback	2

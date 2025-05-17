@@ -1,0 +1,9 @@
+# 添加对C++的支持
+C_SOURCES += $(wildcard Core/Src/*.c)
+CPP_SOURCES += $(wildcard Core/Src/*.cpp)
+
+# 添加C++标志
+CXXFLAGS = $(CFLAGS) -fno-rtti -fno-exceptions
+
+# 使用g++进行链接
+LDFLAGS += -specs=nosys.specs -specs=nano.specs 
